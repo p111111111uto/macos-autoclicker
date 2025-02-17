@@ -21,8 +21,8 @@ def clicker():
 
 def on_press(key):
     global clicking
-    if key == start_stop_key:
-        clicking = not clicking
+    clicking = not clicking
+    update_status()
 
 def set_click_delay():
     global click_delay
@@ -32,8 +32,11 @@ def set_click_delay():
         delay_entry.delete(0, tk.END)
         delay_entry.insert(0, "Invalid")
 
+def update_status():
+    status_label.config(text="Clicking" if clicking else "Stopped")
+
 def start_gui():
-    global delay_entry
+    global delay_entry, status_label
     root = tk.Tk()
     root.title("AutoClicker")
     
@@ -44,6 +47,9 @@ def start_gui():
     
     set_button = tk.Button(root, text="Set Interval", command=set_click_delay)
     set_button.pack()
+    
+    status_label = tk.Label(root, text="Stopped", font=("Arial", 12))
+    status_label.pack()
     
     root.mainloop()
 
