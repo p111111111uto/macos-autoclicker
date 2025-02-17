@@ -51,9 +51,9 @@ t = threading.Thread(target=clicker)
 t.daemon = True
 t.start()
 
-gui_thread = threading.Thread(target=start_gui)
-gui_thread.daemon = True
-gui_thread.start()
+# Start the GUI on the main thread
+start_gui()
 
+# Start the keyboard listener in a separate thread
 with Listener(on_press=on_press) as listener:
     listener.join()
