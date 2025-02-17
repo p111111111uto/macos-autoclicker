@@ -2,7 +2,7 @@ import time
 import threading
 import tkinter as tk
 from pynput.mouse import Controller, Button
-from pynput.keyboard import Listener, KeyCode
+from pynput.keyboard import Listener, Key, KeyCode
 
 # Default settings
 click_delay = 1.0
@@ -10,7 +10,7 @@ clicking = False
 mouse = Controller()
 
 # Start/Stop key
-start_stop_key = KeyCode(char='f6')
+start_stop_key = Key.f6
 
 def clicker():
     global clicking
