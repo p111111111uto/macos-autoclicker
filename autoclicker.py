@@ -1,65 +1,54 @@
-import time
-import threading
-import tkinter as tk
-from pynput.mouse import Controller, Button
-from pynput.keyboard import Listener, Key, KeyCode
+import time 
+import threading 
+from pynput.mouse import Button, Controller 
+from pynput.keyboard import Listener, KeyCode 
 
-# Default settings
-click_delay = 1.0
-clicking = False
-mouse = Controller()
+delay = 60.0
+button = Button.right 
+start_stop_key = KeyCode(char='f6') 
+stop_key = KeyCode(char='f7') 
 
-# Start/Stop key
-start_stop_key = Key.f6
+class ClickMouse(threading.Thread): 
+	def __init__(self, delay, button): 
+		super(ClickMouse, self).__init__() 
+		self.delay = delay 
+		self.button = button 
+		self.running = False
+		self.program_running = True
 
-def clicker():
-    global clicking
-    while True:
-        if clicking:
-            mouse.click(Button.left)
-        time.sleep(click_delay)
+	def start_clicking(self): 
+		self.running = True
 
-def on_press(key):
-    global clicking
-    clicking = not clicking
-    update_status()
+	def stop_clicking(self): 
+		self.running = False
 
-def set_click_delay():
-    global click_delay
-    try:
-        click_delay = float(delay_entry.get())
-    except ValueError:
-        delay_entry.delete(0, tk.END)
-        delay_entry.insert(0, "Invalid")
+	def exit(self): 
+		self.stop_clicking() 
+		self.program_running = False
 
-def update_status():
-    status_label.config(text="Clicking" if clicking else "Stopped")
+	def run(self): 
+		while self.program_running: 
+			while self.running: 
+				mouse.click(self.button) 
+				time.sleep(self.delay) 
+			time.sleep(0.1) 
 
-def start_gui():
-    global delay_entry, status_label
-    root = tk.Tk()
-    root.title("AutoClicker")
-    
-    tk.Label(root, text="Click Interval (seconds):").pack()
-    delay_entry = tk.Entry(root)
-    delay_entry.pack()
-    delay_entry.insert(0, str(click_delay))
-    
-    set_button = tk.Button(root, text="Set Interval", command=set_click_delay)
-    set_button.pack()
-    
-    status_label = tk.Label(root, text="Stopped", font=("Arial", 12))
-    status_label.pack()
-    
-    root.mainloop()
 
-t = threading.Thread(target=clicker)
-t.daemon = True
-t.start()
+mouse = Controller() 
+click_thread = ClickMouse(delay, button) 
+click_thread.start() 
 
-# Start the GUI on the main thread
-start_gui()
+def on_press(key):  
+	if key == start_stop_key: 
+		if click_thread.running: 
+			click_thread.stop_clicking() 
+		else: 
+			click_thread.start_clicking() 
 
-# Start the keyboard listener in a separate thread
-with Listener(on_press=on_press) as listener:
-    listener.join()
+	elif key == stop_key: 
+		click_thread.exit() 
+		listener.stop() 
+
+
+with Listener(on_press=on_press) as listener: 
+	listener.join() 
